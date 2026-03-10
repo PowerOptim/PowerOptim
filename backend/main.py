@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from utils.logger import setup_logging, get_logger
-from database.database import init_db
+from utils import setup_logging, get_logger
+from database import init_db
+from models import User, EnergyReading, BatteryStatus
 
 # Setup logging first thing
 setup_logging(log_level="DEBUG")  # Use DEBUG for development, INFO for production
