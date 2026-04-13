@@ -1,3 +1,4 @@
+import os
 import requests
 from datetime import datetime, timezone, timedelta
 from database.database import SessionLocal
@@ -7,8 +8,11 @@ from utils import get_logger
 
 logger = get_logger(__name__)
 
-PJM_API_KEY = "YOUR_API_KEY"
-PNODE_ID    = "YOUR_NODE_ID"
+PJM_API_KEY = os.getenv("PJM_API_KEY")
+PNODE_ID    = os.getenv("PNODE_ID")
+
+if not PJM_API_KEY or not PNODE_ID:
+    raise RuntimeError("PJM_API_KEY and PNODE_ID must be configured")
 
 HEADERS = {"Ocp-Apim-Subscription-Key": PJM_API_KEY}
 
@@ -49,8 +53,9 @@ def fetch_and_store_realtime_lmp():
         db.add(reading)
         db.commit()
         logger.info(f"Stored real-time LMP: ${reading.total_lmp_rt}/MWh")
-    except Exception as e:
-        logger.error(f"Failed to fetch real-time LMP: {e}")
+    except Exception:
+        db.rollback()
+        logger.exception("Failed to fetch real-time LMP")
     finally:
         db.close()
 
@@ -81,7 +86,8 @@ def fetch_and_store_itsced_lmp():
         db.add(reading)
         db.commit()
         logger.info(f"Stored ITSCED LMP: ${reading.itsced_lmp}/MWh")
-    except Exception as e:
-        logger.error(f"Failed to fetch ITSCED LMP: {e}")
+    except Exception:
+        db.rollback()
+        logger.exception("Failed to fetch ITSCED LMP")
     finally:
         db.close()
