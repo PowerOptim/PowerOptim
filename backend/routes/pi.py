@@ -63,9 +63,7 @@ def get_grid_now(db: Session) -> float:
         .order_by(RealtimeLMP.datetime_beginning_utc.desc())
         .first()
     )
-    # logger.info(f"REAL TIME PRICE: {latest.total_lmp_rt}")
-    # return latest.total_lmp_rt if latest else 0.0
-    return 11
+    return latest.total_lmp_rt if latest else 0.0
 
 def get_grid_future(db: Session) -> float:
     latest = (
@@ -73,9 +71,7 @@ def get_grid_future(db: Session) -> float:
         .order_by(ItscedLMP.datetime_beginning_utc.desc()).
         first()
     )
-    # logger.info(f"FUTURE GRID PRICE: {latest.itsced_lmp}")
-    # return latest.itsced_lmp if latest else 0.0
-    return 12
+    return latest.itsced_lmp if latest else 0.0
 
 
 def get_battery_level(db: Session) -> int:
@@ -85,8 +81,7 @@ def get_battery_level(db: Session) -> int:
         .order_by(SensorReading.timestamp.desc())
         .first()
     )
-    # return latest.battery_level if latest else 0
-    return 100
+    return latest.battery_level if latest else 0
     
 
 @router.get("/pending-command")
