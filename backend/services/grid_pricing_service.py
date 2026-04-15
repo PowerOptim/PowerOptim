@@ -75,7 +75,7 @@ def fetch_and_store_realtime_lmp():
         # Skip if we already have this interval stored
         existing = db.query(RealtimeLMP).filter(
             RealtimeLMP.datetime_beginning_utc == interval_start_utc,
-            RealtimeLMP.pricing_node_id == str(PNODE_ID)
+            RealtimeLMP.pricing_node_id == PNODE_ID
         ).first()
         if existing:
             logger.debug(f"RT LMP for {interval_start_utc} already stored, skipping")
@@ -84,7 +84,7 @@ def fetch_and_store_realtime_lmp():
         reading = RealtimeLMP(
             datetime_beginning_utc      = interval_start_utc,
             datetime_beginning_ept      = datetime.fromisoformat(data["datetime_beginning_ept"]),
-            pricing_node_id             = str(data["pnode_id"]),
+            pricing_node_id             = int(data["pnode_id"]),
             pricing_node_name           = data.get("pnode_name") or "Unknown",
             pricing_node_type           = data.get("type") or "Unknown",
             voltage                     = data.get("voltage") or "N/A",
@@ -139,7 +139,7 @@ def fetch_and_store_da_lmp():
 
             existing = db.query(DayAheadLMP).filter(
                 DayAheadLMP.datetime_beginning_utc == interval_start_utc,
-                DayAheadLMP.pricing_node_id == str(PNODE_ID)
+                DayAheadLMP.pricing_node_id == PNODE_ID
             ).first()
             if existing:
                 continue
@@ -147,7 +147,7 @@ def fetch_and_store_da_lmp():
             reading = DayAheadLMP(
                 datetime_beginning_utc  = interval_start_utc,
                 datetime_beginning_ept  = datetime.fromisoformat(data["datetime_beginning_ept"]),
-                pricing_node_id         = str(data["pnode_id"]),
+                pricing_node_id         = int(data["pnode_id"]),
                 pricing_node_name       = data.get("pnode_name") or "ATSI",
                 # Provide defaults for mandatory DB columns not in DA feed:
                 pricing_node_type       = data.get("type") or "HUB",
@@ -196,7 +196,7 @@ def get_current_and_future_prices() -> dict:
         # Current: most recent RT reading
         recent_rt = (
             db.query(RealtimeLMP)
-            .filter(RealtimeLMP.pricing_node_id == str(PNODE_ID))
+            .filter(RealtimeLMP.pricing_node_id == PNODE_ID)
             .order_by(RealtimeLMP.datetime_beginning_utc.desc())
             .limit(3)
             .all()
@@ -226,7 +226,7 @@ def get_current_and_future_prices() -> dict:
         da_reading = (
             db.query(DayAheadLMP)
             .filter(
-                DayAheadLMP.pricing_node_id == str(PNODE_ID),
+                DayAheadLMP.pricing_node_id == PNODE_ID,
                 DayAheadLMP.datetime_beginning_utc == next_hour,
             )
             .first()
