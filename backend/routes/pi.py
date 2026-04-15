@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from utils import get_logger
 from services.decision_service import get_pending_command
+from services.grid_pricing_service import get_current_and_future_prices
 from models.itsced_lmp import ItscedLMP
 from models.realtime_lmp import RealtimeLMP
 from models.sensor_reading import SensorReading
@@ -57,25 +58,25 @@ async def receive_reading(
     }
     
 
-def get_grid_now(db: Session) -> float | None:
-    now = datetime.now(timezone.utc)
-    latest = (
-        db.query(RealtimeLMP)
-        .filter(RealtimeLMP.valid_until > now)
-        .order_by(RealtimeLMP.datetime_beginning_utc.desc())
-        .first()
-    )
-    return latest.total_lmp_rt if latest else None
+# def get_grid_now(db: Session) -> float | None:
+#     now = datetime.now(timezone.utc)
+#     latest = (
+#         db.query(RealtimeLMP)
+#         .filter(RealtimeLMP.valid_until > now)
+#         .order_by(RealtimeLMP.datetime_beginning_utc.desc())
+#         .first()
+#     )
+#     return latest.total_lmp_rt if latest else None
 
-def get_grid_future(db: Session) -> float | None:
-    now = datetime.now(timezone.utc)
-    latest = (
-        db.query(ItscedLMP)
-        .filter(ItscedLMP.valid_until > now)
-        .order_by(ItscedLMP.datetime_beginning_utc.desc()).
-        first()
-    )
-    return latest.itsced_lmp if latest else None
+# def get_grid_future(db: Session) -> float | None:
+#     now = datetime.now(timezone.utc)
+#     latest = (
+#         db.query(DayAheadLMP)
+#         .filter(DayAheadLMP.valid_until > now)
+#         .order_by(DayAheadLMP.datetime_beginning_utc.desc()).
+#         first()
+#     )
+#     return latest.itsced_lmp if latest else None
 
 
 def get_battery_level(db: Session) -> int | None:
@@ -85,7 +86,7 @@ def get_battery_level(db: Session) -> int | None:
         .order_by(SensorReading.timestamp.desc())
         .first()
     )
-    return latest.battery_level if latest else None
+    return latest.battery_level if latest else 0
     
 
 @router.get("/pending-command")
@@ -96,12 +97,21 @@ async def pending_command(db: Session = Depends(get_db)):
     """
     logger.info("Pi requesting pending command")
 
-    g_now = get_grid_now(db)
-    g_future = get_grid_future(db)
+    # g_now = get_grid_now(db)
+    # g_future = get_grid_future(db)
+    prices = get_current_and_future_prices()
+    print(prices)
+    g_now = prices["current_lmp"]
+    g_future = prices["future_lmp"]
     b_charge = get_battery_level(db)
 
-    if g_now is None or g_future is None:
+    if g_now is None and g_future is not None:
+        raise HTTPException(status_code=503, detail="Current grid pricing unavailable")
+    elif g_now is not None and g_future is None:
+        raise HTTPException(status_code=503, detail="Future grid pricing unavailable")
+    elif g_now is None and g_future is None:
         raise HTTPException(status_code=503, detail="Grid pricing unavailable")
+
     result = get_pending_command(g_now, g_future, b_charge)
 
     logger.debug(

@@ -1,13 +1,20 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, APIRouter
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi.middleware.cors import CORSMiddleware
 from utils import setup_logging, get_logger
 from database import init_db
 from models import User, SensorReading, DayAheadLMP, RealtimeLMP
 from routes import battery, cost, dashboard, energy, system, pi
+from services import grid_pricing_service
 
 # Setup logging first thing
 setup_logging(log_level="DEBUG")  # Use DEBUG for development, INFO for production
 logger = get_logger(__name__)
+
+scheduler = BackgroundScheduler()
 
 app = FastAPI(
     title="PowerOptim API",
@@ -42,11 +49,24 @@ app.add_middleware(
 async def startup_event():
     """Run on application startup"""
     logger.info("🚀 PowerOptim API starting up...")
+
     init_db()
+    
     logger.info("Environment: Development")
     logger.info("API docs available at: /docs")
+
+    # pull initial grid pricing data
+    grid_pricing_service.fetch_and_store_realtime_lmp()
+    grid_pricing_service.fetch_and_store_da_lmp()
+
+    scheduler.add_job(grid_pricing_service.fetch_and_store_realtime_lmp, 'interval', minutes=5)
+    scheduler.add_job(grid_pricing_service.fetch_and_store_da_lmp, 'interval', minutes=10)
+
+    scheduler.start()
+    logger.info("⏰ Background jobs scheduled: Real-time (5m), Day-ahead (10m)")
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Run on application shutdown"""
     logger.info("👋 PowerOptim API shutting down...")
+    scheduler.shutdown()
