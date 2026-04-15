@@ -76,10 +76,8 @@ async def pending_command(db: Session = Depends(get_db)):
     """
     logger.info("Pi requesting pending command")
 
-    # g_now = get_grid_now(db)
-    # g_future = get_grid_future(db)
     prices = get_current_and_future_prices()
-    print(prices)
+    
     g_now = prices["current_lmp"]
     g_future = prices["future_lmp"]
     b_charge = get_battery_level(db)

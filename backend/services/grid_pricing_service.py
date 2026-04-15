@@ -95,7 +95,7 @@ def fetch_and_store_realtime_lmp():
             congestion_price_rt         = data.get("congestion_price_rt", 0),
             marginal_loss_price_rt      = data.get("marginal_loss_price_rt", 0),
             # FIX: Provide defaults for mandatory DB fields that PJM left empty
-            latest_version              = data.get("latest_version") or True, 
+            latest_version              = data.get("latest_version", True), 
             version_number              = data.get("version_nbr") or 1,
             valid_until                 = interval_start_utc + timedelta(minutes=5),
         )
