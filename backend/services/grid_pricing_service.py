@@ -12,7 +12,7 @@ PJM_API_KEY = os.getenv("PJM_API_KEY")
 PNODE_ID    = int(os.getenv("PNODE_ID", "116013753"))  # ATSI Hub
 
 if not PJM_API_KEY:
-    logger.error("PJM_API_KEY is missing! Did you forget to update your .env file?")
+    raise RuntimeError("PJM_API_KEY is missing! Set it in your .env file.")
 
 HEADERS = {"Ocp-Apim-Subscription-Key": PJM_API_KEY}
 BASE_URL = "https://api.pjm.com/api/v1"
