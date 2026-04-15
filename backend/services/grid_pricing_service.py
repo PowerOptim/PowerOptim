@@ -233,11 +233,10 @@ def get_current_and_future_prices() -> dict:
         )
         result["future_lmp"] = da_reading.total_lmp_da if da_reading else None
 
-        # DEBUG
-        print(f"current_lmp: {result['current_lmp']}")
-        print(f"future_lmp: {result['future_lmp']}")
-        print(f"trend: {result['trend']}")
-        print(f"as_of_utc: {result['as_of_utc']}")
+        logger.info(f"current_lmp: ${result['current_lmp']}/MWh")
+        logger.info(f"future_lmp:  ${result['future_lmp']}/MWh")
+        logger.info(f"trend: {result['trend']}")
+        logger.info(f"as_of_utc: {result['as_of_utc']}")
 
         return {
             "current_lmp": result["current_lmp"],
