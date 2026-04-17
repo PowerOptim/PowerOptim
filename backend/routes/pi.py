@@ -65,7 +65,7 @@ def get_battery_level(db: Session) -> int | None:
         .order_by(SensorReading.timestamp.desc())
         .first()
     )
-    return latest.battery_level if latest else 0
+    return latest.battery_level if latest else None
     
 
 @router.get("/pending-command")
