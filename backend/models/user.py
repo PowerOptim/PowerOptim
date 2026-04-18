@@ -40,6 +40,7 @@ class User(Base):
     # user.sensor_readings will give you all EnergyReading rows for this user
     sensor_readings = relationship("SensorReading", back_populates="user")
     switch_events = relationship("SwitchEvent", back_populates="user")
+    pi_status = relationship("PiStatus", back_populates="user")
     
     def __repr__(self):
         """

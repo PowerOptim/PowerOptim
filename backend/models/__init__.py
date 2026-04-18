@@ -4,5 +4,6 @@ from models.switch_event import SwitchEvent
 from models.day_ahead_lmp import DayAheadLMP
 from models.itsced_lmp import ItscedLMP
 from models.realtime_lmp import RealtimeLMP
+from models.pi_status import PiStatus
 
-__all__ = ["User", "SensorReading", "SwitchEvent", "DayAheadLMP", "ItscedLMP", "RealtimeLMP"]
+__all__ = ["User", "SensorReading", "SwitchEvent", "DayAheadLMP", "ItscedLMP", "RealtimeLMP", "PiStatus"]

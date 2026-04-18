@@ -6,7 +6,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi.middleware.cors import CORSMiddleware
 from utils import setup_logging, get_logger
 from database import init_db
-from models import User, SensorReading, DayAheadLMP, RealtimeLMP
 from routes import battery, cost, dashboard, energy, system, pi
 from services import grid_pricing_service
 
