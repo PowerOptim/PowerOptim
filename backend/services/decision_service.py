@@ -24,7 +24,7 @@ def get_pending_command(g_now: float | None, g_future: float | None, b_charge: f
     if b_charge is None:
         return grid_with_berror
 
-    # the future is more expensive, so use the grid now and charge battery
+    # the future is more expensive or equal, so use the grid now and charge battery
     if g_future >= g_now:
         return grid
     
