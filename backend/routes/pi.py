@@ -1,7 +1,7 @@
 """
 Pi routes - all communication between Raspberry Pi and backend lives here
 """
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -16,6 +16,8 @@ from models.switch_event import SwitchEvent
 from schemas.sensor_reading import SensorReadingCreate
 from schemas.switch_event import SwitchEventCreate
 
+
+BATTERY_FRESHNESS_WINDOW = timedelta(minutes=2)  # Pi posts every 10-30s, 2min is generous
 
 logger = get_logger(__name__)
 
@@ -65,7 +67,16 @@ def get_battery_level(db: Session) -> int | None:
         .order_by(SensorReading.timestamp.desc())
         .first()
     )
-    return latest.battery_level if latest else None
+
+    if not latest:
+        return None
+
+    age = datetime.now(timezone.utc) - latest.timestamp.replace(tzinfo=timezone.utc)
+    if age > BATTERY_FRESHNESS_WINDOW:
+        logger.warning(f"Battery reading is stale ({age.seconds}s old), returning None")
+        return None
+
+    return latest.battery_level
 
 
 @router.get("/pending-command")
