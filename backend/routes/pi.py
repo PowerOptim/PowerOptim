@@ -66,7 +66,7 @@ def get_battery_level(db: Session) -> int | None:
         .first()
     )
     return latest.battery_level if latest else None
-    
+
 
 @router.get("/pending-command")
 async def pending_command(db: Session = Depends(get_db)):
