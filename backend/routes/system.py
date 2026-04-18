@@ -32,7 +32,15 @@ async def get_system_data(db: Session = Depends(get_db)):
     logger.info("System data requested")
 
     pi = get_latest_pi_status(db)
-    pi_active = pi and (datetime.now(timezone.utc) - pi.timestamp.replace(tzinfo=timezone.utc)).seconds < 300
+    if pi and pi.timestamp:
+        ts = (
+            pi.timestamp.astimezone(timezone.utc)
+            if pi.timestamp.tzinfo
+            else pi.timestamp.replace(tzinfo=timezone.utc)
+        )
+        pi_active = (datetime.now(timezone.utc) - ts).total_seconds() < 300
+    else:
+        pi_active = False
 
     system_data = {
         "health": {
