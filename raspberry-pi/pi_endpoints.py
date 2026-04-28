@@ -2,7 +2,7 @@ import requests
 import threading
 import time
 
-BASE_URL = "http://3.19.232.240:8000"
+# BASE_URL = "http://3.19.232.240:8000"
 
 
 # Send every 10 seconds
