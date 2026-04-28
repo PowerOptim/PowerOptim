@@ -6,7 +6,7 @@ BASE_URL = "http://3.19.232.240:8000"
 
 
 # Send every 10 seconds
-def send_reading(url, info):
+def send_reading(url: str, info: dict) -> None:
     while True:
         try:
             # Won't wait for this to finish
@@ -17,28 +17,11 @@ def send_reading(url, info):
         time.sleep(10)
 
 
-def get_switch_decision():
-    return None
+# gets called every 10 seconds
+def get_switch_decision(url: str) -> dict:
+    return requests.get(url)
 
 
-def confirm_switch():
-    return None
-
-
-if __name__ == "__main__":
-    thread = threading.Thread(
-        target=send_reading, kwargs={
-            "url": str(BASE_URL),
-            "info": {
-                "battery_level": battery_level,
-                "power_source": power_source,
-                "voltage": voltage,
-                "current": current,
-                "temperature": temperature
-            }
-        }
-    )  
-    thread.start()
-
-
-  
+# called after get_decision_switch returns data
+def confirm_switch(url: str, obj: dict) -> dict:
+    return requests.post(url, obj)
