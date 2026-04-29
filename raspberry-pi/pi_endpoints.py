@@ -8,13 +8,17 @@ import time
 # Send every 10 seconds
 def send_reading(url: str, info: dict) -> None:
     endpoint = url + "/readings"
-    while True:
-        try:
-            requests.post(endpoint, json=info, timeout=5)
-        except requests.exceptions.RequestException:
-            pass
+    try:
+        request = requests.post(endpoint, json=info, timeout=5)
+        print(request)
+        if request.status_code == 422:
+            try:
+                print("Detail:", request.json())
+            except:
+                print("Raw:", request.text)
+    except requests.exceptions.RequestException:
+        pass
 
-        time.sleep(10)
 
 
 # gets called every 10 seconds
