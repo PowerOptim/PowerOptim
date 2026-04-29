@@ -38,6 +38,7 @@ app.add_middleware(
         "http://localhost:5173",  # Default Vite dev server
         "http://localhost:3000",  # Alternative port
         "http://localhost:8080",  # Alternative port
+        "https://main.dr1x7qquirkm5.amplifyapp.com" # Amplify 
     ],
     allow_credentials=True,
     allow_methods=["*"],
