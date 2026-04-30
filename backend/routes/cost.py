@@ -43,7 +43,7 @@ def get_switch_windows(db: Session, days: int = 30) -> list[dict]:
     Returns a list of charge/discharge windows from SwitchEvents.
     Each window has a start, end, and type (grid=charging, battery=discharging).
     """
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).replace(tzinfo=None)
     # Get the last event before the window — seeds the first window's type
     seed_event = (
         db.query(SwitchEvent)
@@ -89,12 +89,13 @@ def get_battery_level_at(db: Session, timestamp: datetime) -> float | None:
     Returns the closest battery level reading to a given timestamp.
     """
     max_gap = timedelta(minutes=15)
+    ts = timestamp.replace(tzinfo=None)
     reading = (
         db.query(SensorReading)
         .filter(SensorReading.user_id == 1)
-        .filter(SensorReading.timestamp >= timestamp - max_gap)
-        .filter(SensorReading.timestamp <= timestamp + max_gap)
-        .order_by(func.abs(func.extract('epoch', SensorReading.timestamp - timestamp)))
+        .filter(SensorReading.timestamp >= ts - max_gap)
+        .filter(SensorReading.timestamp <= ts + max_gap)
+        .order_by(func.abs(func.extract('epoch', SensorReading.timestamp - ts)))
         .first()
     )
     return reading.battery_level if reading else None
@@ -107,8 +108,8 @@ def get_avg_lmp(db: Session, start: datetime, end: datetime) -> float | None:
     result = (
         db.query(func.avg(RealtimeLMP.total_lmp_rt))
         .filter(RealtimeLMP.latest_version == True)
-        .filter(RealtimeLMP.datetime_beginning_utc >= start)
-        .filter(RealtimeLMP.datetime_beginning_utc < end)
+        .filter(RealtimeLMP.datetime_beginning_utc >= start.replace(tzinfo=None))
+        .filter(RealtimeLMP.datetime_beginning_utc < end.replace(tzinfo=None))
         .scalar()
     )
     return result
@@ -132,21 +133,24 @@ def get_pricing_zones(db: Session) -> list[dict]:
         hour_start = hour_start_ept.astimezone(timezone.utc)
         hour_end = hour_end_ept.astimezone(timezone.utc)
         is_past = hour_start <= now
+        # SQLite stores naive datetimes — strip timezone before filtering
+        hour_start_naive = hour_start.replace(tzinfo=None)
+        hour_end_naive = hour_end.replace(tzinfo=None)
 
         if is_past:
             price = (
                 db.query(func.avg(RealtimeLMP.total_lmp_rt))
                 .filter(RealtimeLMP.latest_version == True)
-                .filter(RealtimeLMP.datetime_beginning_utc >= hour_start)
-                .filter(RealtimeLMP.datetime_beginning_utc < hour_end)
+                .filter(RealtimeLMP.datetime_beginning_utc >= hour_start_naive)
+                .filter(RealtimeLMP.datetime_beginning_utc < hour_end_naive)
                 .scalar()
             )
         else:
             price = (
                 db.query(func.avg(DayAheadLMP.total_lmp_da))
                 .filter(DayAheadLMP.latest_version == True)
-                .filter(DayAheadLMP.datetime_beginning_utc >= hour_start)
-                .filter(DayAheadLMP.datetime_beginning_utc < hour_end)
+                .filter(DayAheadLMP.datetime_beginning_utc >= hour_start_naive)
+                .filter(DayAheadLMP.datetime_beginning_utc < hour_end_naive)
                 .scalar()
             )
 
