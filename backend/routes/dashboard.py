@@ -54,7 +54,7 @@ def get_uptime(db: Session, days: int = 30) -> float | None:
     Estimates uptime as % of 10-second intervals in the last N days
     that have at least one sensor reading.
     """
-    since = datetime.now(timezone.utc) - timedelta(days=days)
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).replace(tzinfo=None)
     total_expected = (days * 24 * 60 * 60) / 10  # expected readings at 10s interval
 
     bucket = func.floor(func.extract("epoch", SensorReading.timestamp) / 10)
