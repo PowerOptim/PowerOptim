@@ -229,17 +229,17 @@ def calculate_cost_savings(db: Session, days: int = 30) -> dict:
         breakdown.append({
             "category":     zone_labels[zone_key]["label"],
             "description":  zone_labels[zone_key]["description"],
-            "actual":       round(zone_data["actual"], 2),
-            "withoutSystem": round(zone_data["without_system"], 2),
-            "savings":      round(zone_savings, 2),
+            "actual":       round(zone_data["actual"], 6),
+            "withoutSystem": round(zone_data["without_system"], 6),
+            "savings":      round(zone_savings, 6),
         })
 
     return {
         "monthlyCost": {
-            "actual":           round(total_actual, 2),
-            "withoutSystem":    round(total_without_system, 2),
-            "savings":          round(savings, 2),
-            "savingsPercentage": round(savings_pct, 1)
+            "actual":           round(total_actual, 6),
+            "withoutSystem":    round(total_without_system, 6),
+            "savings":          round(savings, 6),
+            "savingsPercentage": round(savings_pct, 2)
         },
         "breakdown": breakdown
     }

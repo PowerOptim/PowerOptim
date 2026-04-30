@@ -145,9 +145,9 @@ export default {
       this.powerSource    = data.power.source
       this.batteryLevel   = data.battery.level
       this.currentPrice   = data.power.currentPrice != null ? data.power.currentPrice.toFixed(4) : null
-      this.todaySavings   = data.savings.today != null ? data.savings.today.toFixed(2) : '0.00'
+      this.todaySavings   = data.savings.today != null ? data.savings.today.toFixed(6) : '0.000000'
       this.priceTier      = data.power.priceTier
-      this.monthlySavings = data.savings.month != null ? data.savings.month.toFixed(2) : '0.00'
+      this.monthlySavings = data.savings.month != null ? data.savings.month.toFixed(6) : '0.000000'
       this.uptime         = data.system.uptime
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err)
