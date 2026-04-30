@@ -31,11 +31,11 @@
             </div>
             <div class="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
               <span class="text-gray-400 font-bold uppercase text-sm">Last Update</span>
-              <span class="text-white font-mono">{{ lastUpdate }}</span>
+              <span class="text-white font-mono">{{ lastUpdate ?? 'Never' }}</span>
             </div>
             <div class="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
               <span class="text-gray-400 font-bold uppercase text-sm">Uptime</span>
-              <span class="text-white font-mono font-black">{{ uptime }}</span>
+              <span class="text-white font-mono font-black">{{ uptime != null ? uptime + '%' : 'N/A' }}</span>
             </div>
           </div>
         </div>
@@ -47,24 +47,24 @@
           <div class="space-y-5">
             <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700">
               <div class="text-gray-500 text-xs uppercase mb-2">Device ID</div>
-              <div class="font-mono text-xl text-yellow-400 font-bold">{{ deviceId }}</div>
+              <div class="font-mono text-xl text-yellow-400 font-bold">{{ deviceId ?? 'N/A' }}</div>
             </div>
             <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700">
               <div class="text-gray-500 text-xs uppercase mb-2">Firmware</div>
-              <div class="text-white font-mono text-xl font-bold">{{ firmware }}</div>
+              <div class="text-white font-mono text-xl font-bold">{{ firmware ?? 'N/A' }}</div>
             </div>
             <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700">
               <div class="text-gray-500 text-xs uppercase mb-2">IP Address</div>
-              <div class="font-mono text-xl text-amber-400 font-bold">{{ ipAddress }}</div>
+              <div class="font-mono text-xl text-amber-400 font-bold">{{ ipAddress ?? 'N/A' }}</div>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700">
                 <div class="text-gray-500 text-xs uppercase mb-2">CPU</div>
-                <div class="text-white font-black text-2xl">{{ cpu }}%</div>
+                <div class="text-white font-black text-2xl">{{ cpu != null ? cpu + '%' : 'N/A' }}</div>
               </div>
               <div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700">
                 <div class="text-gray-500 text-xs uppercase mb-2">Memory</div>
-                <div class="text-white font-black text-2xl">{{ memoryUsed }}/{{ memoryTotal }}GB</div>
+                <div class="text-white font-black text-2xl">{{ memoryUsed != null && memoryTotal != null ? memoryUsed + '/' + memoryTotal + 'GB' : 'N/A' }}</div>
               </div>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/system/`)
       const data = await res.json()
-      this.lastUpdate   = data.health.lastUpdate
+      this.lastUpdate   = data.health.lastUpdate ? new Date(data.health.lastUpdate).toLocaleString() : null
       this.uptime       = data.health.uptime
       this.systemStatus = [
         { label: 'System',         status: data.health.system,        color: this.statusColor(data.health.system) },
